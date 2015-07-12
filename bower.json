@@ -1,6 +1,6 @@
 {
-    "name": "big.js",
-    "main": "big.js",
+    "name": "linear-big.js",
+    "main": "linear-big.js",
     "license": "MIT",
     "ignore": [
         ".*",

@@ -15,7 +15,7 @@ var count = (function times(Big) {
           str.replace('\n', '<br>') + '</div>' };
     }
 
-    if (!Big && typeof require === 'function') Big = require('../big');
+    if (!Big && typeof require === 'function') Big = require('../linear-big');
 
     function assert(expected, actual) {
         total++;

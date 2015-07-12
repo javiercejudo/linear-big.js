@@ -6,19 +6,10 @@ var arr,
 console.log( '\n STARTING TESTS...\n' );
 
 [
-  'abs',
   'div',
-  'cmp',
   'minus',
-  'mod',
   'plus',
-  'pow',
-  'round',
-  'sqrt',
   'times',
-  'toExponential',
-  'toFixed',
-  'toPrecision',
   'toString'
 ]
 .forEach( function (method) {

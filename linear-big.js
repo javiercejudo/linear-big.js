@@ -1,4 +1,4 @@
-/* big.js v3.1.3 https://github.com/MikeMcl/big.js/LICENCE */
+/* linear-big.js v1.0.0 https://github.com/MikeMcl/big.js/LICENCE */
 ;(function (global) {
     'use strict';
 
@@ -108,62 +108,6 @@
 
 
     // Private functions
-
-
-    /*
-     * Return a string representing the value of Big x in normal or exponential
-     * notation to dp fixed decimal places or significant digits.
-     *
-     * x {Big} The Big to format.
-     * dp {number} Integer, 0 to MAX_DP inclusive.
-     * toE {number} 1 (toExponential), 2 (toPrecision) or undefined (toFixed).
-     */
-    function format(x, dp, toE) {
-        var Big = x.constructor,
-
-            // The index (normal notation) of the digit that may be rounded up.
-            i = dp - (x = new Big(x)).e,
-            c = x.c;
-
-        // Round?
-        if (c.length > ++dp) {
-            rnd(x, i, Big.RM);
-        }
-
-        if (!c[0]) {
-            ++i;
-        } else if (toE) {
-            i = dp;
-
-        // toFixed
-        } else {
-            c = x.c;
-
-            // Recalculate i as x.e may have changed if value rounded up.
-            i = x.e + i + 1;
-        }
-
-        // Append zeros?
-        for (; c.length < i; c.push(0)) {
-        }
-        i = x.e;
-
-        /*
-         * toPrecision returns exponential notation if the number of
-         * significant digits specified is less than the number of digits
-         * necessary to represent the integer part of the value in normal
-         * notation.
-         */
-        return toE === 1 || toE && (dp <= i || i <= Big.E_NEG) ?
-
-          // Exponential notation.
-          (x.s < 0 && c[0] ? '-' : '') +
-            (c.length > 1 ? c[0] + '.' + c.join('').slice(1) : c[0]) +
-              (i < 0 ? 'e' : 'e+') + i
-
-          // Normal notation.
-          : x.toString();
-    }
 
 
     /*
@@ -322,65 +266,6 @@
 
 
     /*
-     * Return a new Big whose value is the absolute value of this Big.
-     */
-    P.abs = function () {
-        var x = new this.constructor(this);
-        x.s = 1;
-
-        return x;
-    };
-
-
-    /*
-     * Return
-     * 1 if the value of this Big is greater than the value of Big y,
-     * -1 if the value of this Big is less than the value of Big y, or
-     * 0 if they have the same value.
-    */
-    P.cmp = function (y) {
-        var xNeg,
-            x = this,
-            xc = x.c,
-            yc = (y = new x.constructor(y)).c,
-            i = x.s,
-            j = y.s,
-            k = x.e,
-            l = y.e;
-
-        // Either zero?
-        if (!xc[0] || !yc[0]) {
-            return !xc[0] ? !yc[0] ? 0 : -j : i;
-        }
-
-        // Signs differ?
-        if (i != j) {
-            return i;
-        }
-        xNeg = i < 0;
-
-        // Compare exponents.
-        if (k != l) {
-            return k > l ^ xNeg ? 1 : -1;
-        }
-
-        i = -1;
-        j = (k = xc.length) < (l = yc.length) ? k : l;
-
-        // Compare digit by digit.
-        for (; ++i < j;) {
-
-            if (xc[i] != yc[i]) {
-                return xc[i] > yc[i] ^ xNeg ? 1 : -1;
-            }
-        }
-
-        // Compare lengths.
-        return k == l ? 0 : k > l ^ xNeg ? 1 : -1;
-    };
-
-
-    /*
      * Return a new Big whose value is the value of this Big divided by the
      * value of Big y, rounded, if necessary, to a maximum of Big.DP decimal
      * places using rounding mode Big.RM.
@@ -512,51 +397,6 @@
 
 
     /*
-     * Return true if the value of this Big is equal to the value of Big y,
-     * otherwise returns false.
-     */
-    P.eq = function (y) {
-        return !this.cmp(y);
-    };
-
-
-    /*
-     * Return true if the value of this Big is greater than the value of Big y,
-     * otherwise returns false.
-     */
-    P.gt = function (y) {
-        return this.cmp(y) > 0;
-    };
-
-
-    /*
-     * Return true if the value of this Big is greater than or equal to the
-     * value of Big y, otherwise returns false.
-     */
-    P.gte = function (y) {
-        return this.cmp(y) > -1;
-    };
-
-
-    /*
-     * Return true if the value of this Big is less than the value of Big y,
-     * otherwise returns false.
-     */
-    P.lt = function (y) {
-        return this.cmp(y) < 0;
-    };
-
-
-    /*
-     * Return true if the value of this Big is less than or equal to the value
-     * of Big y, otherwise returns false.
-     */
-    P.lte = function (y) {
-         return this.cmp(y) < 1;
-    };
-
-
-    /*
      * Return a new Big whose value is the value of this Big minus the value
      * of Big y.
      */
@@ -673,41 +513,6 @@
 
 
     /*
-     * Return a new Big whose value is the value of this Big modulo the
-     * value of Big y.
-     */
-    P.mod = function (y) {
-        var yGTx,
-            x = this,
-            Big = x.constructor,
-            a = x.s,
-            b = (y = new Big(y)).s;
-
-        if (!y.c[0]) {
-            throwErr(NaN);
-        }
-
-        x.s = y.s = 1;
-        yGTx = y.cmp(x) == 1;
-        x.s = a;
-        y.s = b;
-
-        if (yGTx) {
-            return new Big(x);
-        }
-
-        a = Big.DP;
-        b = Big.RM;
-        Big.DP = Big.RM = 0;
-        x = x.div(y);
-        Big.DP = a;
-        Big.RM = b;
-
-        return this.minus( x.times(y) );
-    };
-
-
-    /*
      * Return a new Big whose value is the value of this Big plus the value
      * of Big y.
      */
@@ -787,123 +592,6 @@
         y.e = ye;
 
         return y;
-    };
-
-
-    /*
-     * Return a Big whose value is the value of this Big raised to the power n.
-     * If n is negative, round, if necessary, to a maximum of Big.DP decimal
-     * places using rounding mode Big.RM.
-     *
-     * n {number} Integer, -MAX_POWER to MAX_POWER inclusive.
-     */
-    P.pow = function (n) {
-        var x = this,
-            one = new x.constructor(1),
-            y = one,
-            isNeg = n < 0;
-
-        if (n !== ~~n || n < -MAX_POWER || n > MAX_POWER) {
-            throwErr('!pow!');
-        }
-
-        n = isNeg ? -n : n;
-
-        for (;;) {
-
-            if (n & 1) {
-                y = y.times(x);
-            }
-            n >>= 1;
-
-            if (!n) {
-                break;
-            }
-            x = x.times(x);
-        }
-
-        return isNeg ? one.div(y) : y;
-    };
-
-
-    /*
-     * Return a new Big whose value is the value of this Big rounded to a
-     * maximum of dp decimal places using rounding mode rm.
-     * If dp is not specified, round to 0 decimal places.
-     * If rm is not specified, use Big.RM.
-     *
-     * [dp] {number} Integer, 0 to MAX_DP inclusive.
-     * [rm] 0, 1, 2 or 3 (ROUND_DOWN, ROUND_HALF_UP, ROUND_HALF_EVEN, ROUND_UP)
-     */
-    P.round = function (dp, rm) {
-        var x = this,
-            Big = x.constructor;
-
-        if (dp == null) {
-            dp = 0;
-        } else if (dp !== ~~dp || dp < 0 || dp > MAX_DP) {
-            throwErr('!round!');
-        }
-        rnd(x = new Big(x), dp, rm == null ? Big.RM : rm);
-
-        return x;
-    };
-
-
-    /*
-     * Return a new Big whose value is the square root of the value of this Big,
-     * rounded, if necessary, to a maximum of Big.DP decimal places using
-     * rounding mode Big.RM.
-     */
-    P.sqrt = function () {
-        var estimate, r, approx,
-            x = this,
-            Big = x.constructor,
-            xc = x.c,
-            i = x.s,
-            e = x.e,
-            half = new Big('0.5');
-
-        // Zero?
-        if (!xc[0]) {
-            return new Big(x);
-        }
-
-        // If negative, throw NaN.
-        if (i < 0) {
-            throwErr(NaN);
-        }
-
-        // Estimate.
-        i = Math.sqrt(x.toString());
-
-        // Math.sqrt underflow/overflow?
-        // Pass x to Math.sqrt as integer, then adjust the result exponent.
-        if (i === 0 || i === 1 / 0) {
-            estimate = xc.join('');
-
-            if (!(estimate.length + e & 1)) {
-                estimate += '0';
-            }
-
-            r = new Big( Math.sqrt(estimate).toString() );
-            r.e = ((e + 1) / 2 | 0) - (e < 0 || e & 1);
-        } else {
-            r = new Big(i.toString());
-        }
-
-        i = r.e + (Big.DP += 4);
-
-        // Newton-Raphson iteration.
-        do {
-            approx = r;
-            r = half.times( approx.plus( x.div(approx) ) );
-        } while ( approx.c.slice(0, i).join('') !==
-                       r.c.slice(0, i).join('') );
-
-        rnd(r, Big.DP -= 4, Big.RM);
-
-        return r;
     };
 
 
@@ -1030,93 +718,6 @@
 
         // Avoid '-0'
         return x.s < 0 && x.c[0] ? '-' + str : str;
-    };
-
-
-    /*
-     ***************************************************************************
-     * If toExponential, toFixed, toPrecision and format are not required they
-     * can safely be commented-out or deleted. No redundant code will be left.
-     * format is used only by toExponential, toFixed and toPrecision.
-     ***************************************************************************
-     */
-
-
-    /*
-     * Return a string representing the value of this Big in exponential
-     * notation to dp fixed decimal places and rounded, if necessary, using
-     * Big.RM.
-     *
-     * [dp] {number} Integer, 0 to MAX_DP inclusive.
-     */
-    P.toExponential = function (dp) {
-
-        if (dp == null) {
-            dp = this.c.length - 1;
-        } else if (dp !== ~~dp || dp < 0 || dp > MAX_DP) {
-            throwErr('!toExp!');
-        }
-
-        return format(this, dp, 1);
-    };
-
-
-    /*
-     * Return a string representing the value of this Big in normal notation
-     * to dp fixed decimal places and rounded, if necessary, using Big.RM.
-     *
-     * [dp] {number} Integer, 0 to MAX_DP inclusive.
-     */
-    P.toFixed = function (dp) {
-        var str,
-            x = this,
-            Big = x.constructor,
-            neg = Big.E_NEG,
-            pos = Big.E_POS;
-
-        // Prevent the possibility of exponential notation.
-        Big.E_NEG = -(Big.E_POS = 1 / 0);
-
-        if (dp == null) {
-            str = x.toString();
-        } else if (dp === ~~dp && dp >= 0 && dp <= MAX_DP) {
-            str = format(x, x.e + dp);
-
-            // (-0).toFixed() is '0', but (-0.1).toFixed() is '-0'.
-            // (-0).toFixed(1) is '0.0', but (-0.01).toFixed(1) is '-0.0'.
-            if (x.s < 0 && x.c[0] && str.indexOf('-') < 0) {
-        //E.g. -0.5 if rounded to -0 will cause toString to omit the minus sign.
-                str = '-' + str;
-            }
-        }
-        Big.E_NEG = neg;
-        Big.E_POS = pos;
-
-        if (!str) {
-            throwErr('!toFix!');
-        }
-
-        return str;
-    };
-
-
-    /*
-     * Return a string representing the value of this Big rounded to sd
-     * significant digits using Big.RM. Use exponential notation if sd is less
-     * than the number of digits necessary to represent the integer part of the
-     * value in normal notation.
-     *
-     * sd {number} Integer, 1 to MAX_DP inclusive.
-     */
-    P.toPrecision = function (sd) {
-
-        if (sd == null) {
-            return this.toString();
-        } else if (sd !== ~~sd || sd < 1 || sd > MAX_DP) {
-            throwErr('!toPre!');
-        }
-
-        return format(this, sd - 1, 2);
     };
 
 

@@ -14,19 +14,11 @@
       i = 0,
       start = +new Date(),
       methods = [
-        'abs',
         'div',
-        'cmp',
         'minus',
-        'mod',
         'plus',
-        'pow',
         'round',
-        'sqrt',
         'times',
-        'toExponential',
-        'toFixed',
-        'toPrecision',
         'toString'
       ];
 
@@ -40,7 +32,7 @@
           document.body.scrollIntoView(false);
           return;
       }
-      
+
       script.onload = script.onreadystatechange = function () {
           if (!script.readyState || /loaded|complete/.test(script.readyState)) {
               if (!count)  {
